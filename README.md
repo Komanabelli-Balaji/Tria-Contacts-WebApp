@@ -4,7 +4,7 @@ A modern, responsive contacts management application built with React, featuring
 
 ## 🚀 Live Demo
 
-[View Live Application](https://tria-contacts-webapp.vercel.app)
+[View Live Application](https://tria-contacts-web-app.vercel.app)
 
 ## ✨ Features
 
