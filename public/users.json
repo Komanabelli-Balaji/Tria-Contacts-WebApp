@@ -4,12 +4,6 @@
       "username": "Balaji",
       "passwordHash": "3a7bd3e2360a3d...f0b7", 
       "salt": "a9c7e2f1"
-    },
-    {
-      "id": "c4e8dbe5-2dfb-4f25-bfa1-d12032b9cde4",
-      "username": "kiran_user",
-      "passwordHash": "f5c29b8d12e0d...a3ff",
-      "salt": "d91a6b3c"
     }
   ]
   
