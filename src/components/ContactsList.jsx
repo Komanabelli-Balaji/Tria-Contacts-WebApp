@@ -3,12 +3,11 @@ import {
   Mail, 
   Heart, 
   Trash2, 
-  MoreVertical, 
   Edit,
   MessageCircle,
   Users
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 
 const ContactsList = ({
@@ -21,9 +20,11 @@ const ContactsList = ({
   showContactActions,
   onCloseActions,
   onToggleFavorite,
-  onDeleteContact
+  onDeleteContact,
+  onEditContact,
 }) => {
-  const [showActionMenu, setShowActionMenu] = useState(null)
+  const [selectedContactRef, setSelectedContactRef] = useState(null)
+  const contactActionRef = useRef(null)
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
@@ -36,18 +37,16 @@ const ContactsList = ({
     })
   }
 
-  const handleContactClick = (contact) => {
+  const handleContactClick = (contact, event) => {
     if (isSelectionMode) {
       onContactSelect(contact.id)
     } else {
+      // Store the contact element reference for positioning
+      setSelectedContactRef(event.currentTarget)
       onContactClick(contact.id)
     }
   }
 
-  const handleActionMenu = (e, contactId) => {
-    e.stopPropagation()
-    setShowActionMenu(showActionMenu === contactId ? null : contactId)
-  }
 
   const handleCall = (contact) => {
     toast.success(`Calling ${contact.name}...`)
@@ -78,17 +77,34 @@ const ContactsList = ({
   }
 
   const handleEdit = (contact) => {
-    toast.success(`Edit ${contact.name} - Feature coming soon!`)
+    onEditContact(contact)
     onCloseActions()
   }
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contactActionRef.current && !contactActionRef.current.contains(event.target) && 
+          selectedContactRef && !selectedContactRef.contains(event.target)) {
+        onCloseActions()
+      }
+    }
+
+    if (showContactActions) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showContactActions, selectedContactRef, onCloseActions])
+
   return (
-    <div className="flex-1 p-6 bg-custom-primary">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-custom">
+    <div className="h-full flex flex-col p-4 lg:p-6 bg-custom-primary">
+      <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-custom overflow-hidden flex flex-col">
         {/* Table Header */}
-        <div className="px-6 py-4 border-b border-custom">
-          <div className="grid grid-cols-6 gap-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-            <div className="flex items-center">
+        <div className="px-4 lg:px-6 py-4 border-b border-custom">
+          <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] lg:grid-cols-[auto_1fr_1fr_1fr_1fr_auto] gap-2 lg:gap-4 text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400 min-w-[600px] lg:min-w-[800px]">
+            <div className="flex items-center w-8">
               {isSelectionMode && (
                 <input
                   type="checkbox"
@@ -107,13 +123,13 @@ const ContactsList = ({
             <div>Name</div>
             <div>Email</div>
             <div>Phone</div>
-            <div>Created Date</div>
-            <div className="text-right">Actions</div>
+            <div className="hidden lg:block">Created Date</div>
+            <div className="text-right w-12">Actions</div>
           </div>
         </div>
 
         {/* Contact Rows */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
           {contacts.length === 0 ? (
             <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
               <Users className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
@@ -124,14 +140,14 @@ const ContactsList = ({
             contacts.map((contact) => (
               <div
                 key={contact.id}
-                className={`px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
+                className={`px-4 lg:px-6 py-3 lg:py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
                   selectedContacts.includes(contact.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                 }`}
-                onClick={() => handleContactClick(contact)}
+                onClick={(e) => handleContactClick(contact, e)}
               >
-                <div className="grid grid-cols-6 gap-4 items-center">
+                <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] lg:grid-cols-[auto_1fr_1fr_1fr_1fr_auto] gap-2 lg:gap-4 items-center min-w-[600px] lg:min-w-[800px]">
                   {/* Checkbox */}
-                  <div className="flex items-center">
+                  <div className="flex items-center w-8">
                     {isSelectionMode && (
                       <input
                         type="checkbox"
@@ -144,77 +160,56 @@ const ContactsList = ({
                   </div>
 
                   {/* Name with Avatar */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 lg:space-x-3">
                     <img
                       src={contact.avatar}
                       alt={contact.name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover"
                     />
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900 dark:text-white text-sm lg:text-base truncate">
                         {contact.name}
                         {contact.isFavorite && (
-                          <Heart className="inline w-4 h-4 text-red-500 ml-2" />
+                          <Heart className="inline w-3 h-3 lg:w-4 lg:h-4 text-red-500 ml-1 lg:ml-2" />
                         )}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                      <div className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 truncate">
                         ID: {contact.id.slice(0, 8)}...
                       </div>
                     </div>
                   </div>
 
                   {/* Email */}
-                  <div className="text-sm text-gray-900 dark:text-white">
+                  <div className="text-xs lg:text-sm text-gray-900 dark:text-white truncate">
                     {contact.email}
                   </div>
 
                   {/* Phone */}
-                  <div className="text-sm text-gray-900 dark:text-white">
+                  <div className="text-xs lg:text-sm text-gray-900 dark:text-white truncate">
                     {contact.phone}
                   </div>
 
                   {/* Created Date */}
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="hidden lg:block text-xs lg:text-sm text-gray-500 dark:text-gray-400 truncate">
                     {formatDate(contact.createdDate)}
                   </div>
 
                   {/* Actions */}
-                  <div className="flex justify-end">
+                  <div className="flex justify-end w-20 space-x-1">
                     <button
-                      onClick={(e) => handleActionMenu(e, contact.id)}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                      onClick={() => handleEdit(contact)}
+                      className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      title="Edit"
                     >
-                      <MoreVertical className="w-4 h-4" />
+                      <Edit className="w-4 h-4" />
                     </button>
-
-                    {/* Action Menu */}
-                    {showActionMenu === contact.id && (
-                      <div className="absolute right-6 mt-8 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-20">
-                        <div className="py-2">
-                          <button
-                            onClick={() => handleEdit(contact)}
-                            className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-                          >
-                            <Edit className="w-4 h-4" />
-                            <span>Edit Contact</span>
-                          </button>
-                          <button
-                            onClick={() => handleToggleFavorite(contact)}
-                            className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-                          >
-                            <Heart className={`w-4 h-4 ${contact.isFavorite ? 'text-red-500' : ''}`} />
-                            <span>{contact.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}</span>
-                          </button>
-                          <button
-                            onClick={() => handleDelete(contact)}
-                            className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Delete Contact</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    <button
+                      onClick={() => handleDelete(contact)}
+                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -223,51 +218,48 @@ const ContactsList = ({
         </div>
       </div>
 
-      {/* Contact Actions Bottom Bar */}
-      {showContactActions && selectedContact && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-custom p-4 shadow-lg">
-          <div className="max-w-7xl mx-auto flex items-center justify-center space-x-6">
+      {/* Contact Actions Floating Section */}
+      {showContactActions && selectedContact && selectedContactRef && (
+        <div 
+          ref={contactActionRef}
+          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl p-2 lg:p-4 z-50 animate-in slide-in-from-top-2 duration-300"
+          style={{
+            top: Math.min(
+              selectedContactRef.getBoundingClientRect().bottom + window.scrollY + 10,
+              window.innerHeight - 200
+            ),
+            left: Math.max(10, selectedContactRef.getBoundingClientRect().left + window.scrollX),
+            minWidth: Math.min(selectedContactRef.offsetWidth, 280)
+          }}
+        >
+          <div className="flex items-center space-x-1 lg:space-x-2 flex-wrap">
             <button
               onClick={() => handleCall(contacts.find(c => c.id === selectedContact))}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              className="flex items-center space-x-1 px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-xs"
             >
-              <Phone className="w-4 h-4" />
-              <span>Call</span>
+              <Phone className="w-3 h-3" />
+              <span className="hidden sm:block">Call</span>
             </button>
-            
+
             <button
               onClick={() => handleMessage(contacts.find(c => c.id === selectedContact))}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="flex items-center space-x-1 px-2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs"
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Message</span>
+              <MessageCircle className="w-3 h-3" />
+              <span className="hidden sm:block">Message</span>
             </button>
-            
+
             <button
               onClick={() => handleToggleFavorite(contacts.find(c => c.id === selectedContact))}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="flex items-center space-x-1 px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-xs"
             >
-              <Heart className="w-4 h-4" />
-              <span>Favorite</span>
-            </button>
-            
-            <button
-              onClick={onCloseActions}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-            >
-              <span>Close</span>
+              <Heart className="w-3 h-3" />
+              <span className="hidden sm:block">Favorite</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Overlay to close action menu */}
-      {showActionMenu && (
-        <div
-          className="fixed inset-0 z-10"
-          onClick={() => setShowActionMenu(null)}
-        />
-      )}
     </div>
   )
 }
