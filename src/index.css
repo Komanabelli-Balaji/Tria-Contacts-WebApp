@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Custom color scheme for light and dark modes */
+:root {
+  /* Light mode colors */
+  --bg-primary: #F9FAFB;
+  --bg-card: #FFFFFF;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --accent-blue: #3B82F6;
+  --accent-blue-hover: #2563EB;
+  --sidebar-bg: #1E3A8A;
+  --border-color: #E5E7EB;
+}
+
+[data-theme="dark"] {
+  /* Dark mode colors */
+  --bg-primary: #0F172A;
+  --bg-card: #1E293B;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --accent-blue: #6366F1;
+  --accent-blue-hover: #4F46E5;
+  --sidebar-bg: #1E293B;
+  --border-color: #334155;
+}
+
+/* Custom utility classes */
+.bg-custom-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-custom-card {
+  background-color: var(--bg-card);
+}
+
+.text-custom-primary {
+  color: var(--text-primary);
+}
+
+.text-custom-secondary {
+  color: var(--text-secondary);
+}
+
+.text-custom-accent {
+  color: var(--accent-blue);
+}
+
+.bg-custom-accent {
+  background-color: var(--accent-blue);
+}
+
+.bg-custom-accent-hover:hover {
+  background-color: var(--accent-blue-hover);
+}
+
+.bg-custom-sidebar {
+  background-color: var(--sidebar-bg);
+}
+
+.border-custom {
+  border-color: var(--border-color);
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-secondary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue);
+}

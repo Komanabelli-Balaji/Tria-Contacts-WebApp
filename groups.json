@@ -1,0 +1,16 @@
+[
+  {
+    "id": "group1",
+    "name": "Work Team",
+    "description": "Colleagues from work",
+    "createdDate": "2025-05-15T08:00:00Z",
+    "memberCount": 3
+  },
+  {
+    "id": "group2",
+    "name": "College Friends",
+    "description": "Friends from college days",
+    "createdDate": "2025-05-16T09:00:00Z",
+    "memberCount": 2
+  }
+]
