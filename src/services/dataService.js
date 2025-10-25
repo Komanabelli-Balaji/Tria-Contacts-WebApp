@@ -1,7 +1,3 @@
-// Data service for handling contacts.json operations
-// Note: In a real application, this would make API calls to a backend
-// For this demo, we'll simulate the operations and update localStorage
-
 const STORAGE_KEY = 'tria-contacts';
 const GROUPS_STORAGE_KEY = 'tria-groups';
 
@@ -15,7 +11,7 @@ export const dataService = {
       }
       
       // If no stored data, load from contacts.json (initial data)
-      const response = await fetch('/contacts.json');
+      const response = await fetch('/public/contacts.json');
       const contacts = await response.json();
       this.saveContacts(contacts);
       return contacts;
@@ -153,7 +149,7 @@ export const dataService = {
       }
       
       // If no stored data, load from groups.json (initial data)
-      const response = await fetch('/groups.json');
+      const response = await fetch('/public/groups.json');
       const groups = await response.json();
       this.saveGroups(groups);
       return groups;
