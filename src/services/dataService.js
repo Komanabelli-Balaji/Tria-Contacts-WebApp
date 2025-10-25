@@ -7,12 +7,18 @@ export const dataService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
+        console.log('Loading contacts from localStorage');
         return JSON.parse(stored);
       }
       
       // If no stored data, load from contacts.json (initial data)
-      const response = await fetch('/public/contacts.json');
+      console.log('Loading contacts from JSON file');
+      const response = await fetch('/contacts.json');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contacts: ${response.status} ${response.statusText}`);
+      }
       const contacts = await response.json();
+      console.log('Loaded contacts from JSON:', contacts.length, 'contacts');
       this.saveContacts(contacts);
       return contacts;
     } catch (error) {
@@ -145,12 +151,18 @@ export const dataService = {
     try {
       const stored = localStorage.getItem(GROUPS_STORAGE_KEY);
       if (stored) {
+        console.log('Loading groups from localStorage');
         return JSON.parse(stored);
       }
       
       // If no stored data, load from groups.json (initial data)
-      const response = await fetch('/public/groups.json');
+      console.log('Loading groups from JSON file');
+      const response = await fetch('/groups.json');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch groups: ${response.status} ${response.statusText}`);
+      }
       const groups = await response.json();
+      console.log('Loaded groups from JSON:', groups.length, 'groups');
       this.saveGroups(groups);
       return groups;
     } catch (error) {
